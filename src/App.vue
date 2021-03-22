@@ -1,12 +1,6 @@
 <template>
   <div id="app">
     <div class="container">
-      <div v-if="user.name" v-bind:class="user.gender == 'male' ? 'male' : 'female'">
-        <p>name:{{ user.name }}</p>
-        <p>username: {{ user.surname }}</p>
-        <p>gender:{{ user.gender }}</p>
-      </div>
-
 
       <div>
         <div class="form-group">
@@ -24,6 +18,13 @@
           </div>
         </div>
         <div class="form-group">
+          <label>Age</label>
+          <input type="text" class="form-control" v-model="newUser.age">
+          <div class="text-danger" v-if="errors.users.age">
+            <p>{{errors.users.age}}</p>
+          </div>
+        </div>
+        <div class="form-group">
           <label>Gender</label>
           <input type="text" class="form-control" v-model="newUser.gender">
           <div class="text-danger" v-if="errors.users.gender">
@@ -33,6 +34,30 @@
         <div class="form-group">
           <button class="btn btn-success" v-on:click="saveUser">Change</button>
         </div>
+        <div class="form-group">
+          <button class="btn btn-success" v-on:click="age()" >Age</button>
+        </div>
+      </div>
+      <div>
+        <table class="table table-dark table-border table-hover">
+          <tr>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Gender</th>
+            <th>Age</th>
+            <th>Action</th>
+          </tr>
+          <tr v-for="user in users" :key="user.id">
+            <td>{{user.name}}</td>
+            <td>{{user.surname}}</td>
+            <td>{{user.gender}}</td>
+            <td >{{user.age}} {{user.age > 50 ? "old" : "young"}}</td>
+            <td>
+              <button class="btn btn-danger" v-on:click="deleteUser(user.id)">Delete</button>
+            </td>
+          </tr>
+
+        </table>
       </div>
     </div>
   </div>
@@ -45,39 +70,76 @@ export default {
   name: 'App',
   data(){
     return {
-      user:{
-        name: "",
-        surname:"",
-        gender:""
-      },
+
+      users:[],
+
 
       newUser:{
         name: "",
         surname:"",
-        gender:""
+        gender:"",
+        age:""
       },
       errors:{
         users:{
           name:"",
           surname:"",
-          gender:""
+          gender:"",
+          age:""
         }
       }
 
     }
   },
+
+  mounted(){
+    this.getUsersStorage();
+  },
+
   methods:{
+
+    deleteUser(id){
+      console.log(id)
+    },
     saveUser(){
       this.errors.users.name = this.newUser.name == "" ? "Name is required" : ""
       this.errors.users.surname = this.newUser.surname == "" ? "Surname is required" : ""
       this.errors.users.gender = this.newUser.gender == "" ? "Gender is required" : ""
+      this.errors.users.age = this.newUser.age == "" ? "Agea is required" : ""
+
+      if(this.errors.users.gender == "" && this.errors.users.name == "" && this.errors.users.surname == "" && this.errors.users.age == ""){
+        const user = {};
+
+        user.name = this.newUser.name;
+        user.surname = this.newUser.surname;
+        user.age = this.newUser.age;
+        user.gender = this.newUser.gender;
 
 
-      if(this.errors.users.gender == "" && this.errors.users.name == "" && this.errors.users.surname == ""){
-        this.user.name = this.newUser.name
-        this.user.surname = this.newUser.surname
-        this.user.gender = this.newUser.gender
+        user.id = this.generateRandomNumber();
+        this.users.push(user)
+        this.setUsersStorage();
       }
+    },
+    setUsersStorage(){
+        const users = JSON.stringify(this.users);
+        localStorage.setItem("users",users);
+    },
+    getUsersStorage(){
+      let users = localStorage.getItem("users",users) || null;
+      users = JSON.parse(users);
+      this.users = users ? users : [];
+
+    },
+
+    generateRandomNumber(){
+      const d = new Date();
+      return d.getTime() + Math.floor(Math.random() * 10);
+    },
+
+    age(){
+      let rand = Math.ceil(Math.random() * 10)
+      this.newUser.age = rand
     }
 
   }
