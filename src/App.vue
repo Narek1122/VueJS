@@ -55,10 +55,27 @@
             <td>
               <button class="btn btn-danger" v-on:click="deleteUser(user.id)">Delete</button>
             </td>
+            <td>
+              <button class="btn btn-danger" v-on:click="changeItems(user.id) " >Change Item</button>
+            </td>
           </tr>
 
         </table>
+        <div id="div" style="display:none">
+            <div class="form-group">
+              <label >Name</label>
+              <input type="text" class="form-control" v-model="changeUser.name">
+            </div>
+          <div class="form-group">
+            <label >Surname</label>
+            <input type="text" class="form-control" v-model="changeUser.surname">
+          </div>
+          <div>
+            <button v-on:click="chItems" class="btn btn-success">Change User</button>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -80,6 +97,12 @@ export default {
         gender:"",
         age:""
       },
+      changeUser:{
+        name:"",
+        surname:"",
+        click :0,
+        id:0
+      },
       errors:{
         users:{
           name:"",
@@ -99,7 +122,52 @@ export default {
   methods:{
 
     deleteUser(id){
-      console.log(id)
+
+      let users = localStorage.getItem("users",users) || null;
+      users = JSON.parse(users);
+      for(let i=0;i<users.length;i++){
+        if(users[i].id == id){
+          users.splice(users[i],1)
+        }
+      }
+      users = JSON.stringify(users)
+      localStorage.setItem('users',users)
+      location.reload()
+
+    },
+
+    chItems(){
+      let id = this.changeUser.id
+      if(this.changeUser.name) {
+        let users = localStorage.getItem("users", users) || null;
+        users = JSON.parse(users);
+        for (let i = 0; i < users.length; i++) {
+          if (users[i].id == id) {
+            users[i].name = this.changeUser.name
+            users[i].surname = this.changeUser.surname
+          }
+        }
+        users = JSON.stringify(users)
+        localStorage.setItem('users', users)
+        location.reload()
+      }
+    },
+
+    changeItems(id)
+      {
+        this.changeUser.click++
+
+        if (this.changeUser.click == 1) {
+          $("#div").css({"display": "block"})
+          this.changeUser.id = id
+        }
+
+        if (this.changeUser.click == 2) {
+          $("#div").css({"display": "none"})
+          this.changeUser.click = 0
+        }
+
+
     },
     saveUser(){
       this.errors.users.name = this.newUser.name == "" ? "Name is required" : ""
